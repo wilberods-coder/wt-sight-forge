@@ -1,0 +1,11 @@
+{
+  "name": "WT Sight Forge",
+  "short_name": "WT Sight Forge",
+  "description": "War Thunder custom sight generator",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0B0F14",
+  "theme_color": "#0B0F14",
+  "icons": [{ "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

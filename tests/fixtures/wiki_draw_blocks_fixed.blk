@@ -1,0 +1,51 @@
+drawLines {
+ line { line:p4 = 0, -1.0, 0, -0.018; move:b = false; }
+ line { line:p4 = -50, 30, -50, 40; thousandth:b = true; }
+}
+drawTexts {
+  text {
+    text:t = "X" // desired symbol
+    align:i = 0 // offset relative to its indicated position
+    pos:p2 = 32, 0 // coordinates of the X and Y symbol positions in fractions of the screen
+    move:b = no // whether the text will move when a range is entered
+    thousandth:b = yes // or in thousands
+    size:r = 1.7 // text size
+    highlight:b = yes
+  }
+}
+drawCircles {
+  circle {
+    segment:p2 = 0.0, 360.0; // Sector of a circle
+    pos:p2 = 0.0, 90.0; // Position
+    diameter:r = 3.0; // Diameter. If thousandth=yes, then in thousandths
+    size:r = 2.0; // Line Thickness
+    move:b = no;
+    thousandth:b = yes;
+  }
+}
+drawQuads {
+  quad {  // Simple fixed quadrangle
+    tl:p2 = -10, -10; // Top left top
+    tr:p2 = 10, -10; // Top left top
+    br:p2 = 10, 10; // Top right bottom
+    bl:p2 = -10, 10; // Top left bottom
+
+    thousandth:b = true;
+  }
+
+  quad {  // Object that can be moved along the radius
+    tl:p2 = -10, -140;
+    tr:p2 = 10, -140;
+    br:p2 = 0, -96;
+    bl:p2 = 0, -96;
+
+    center:p2 = 0, -90; // The center of the figure is needed for correct rotation. By default the geometric center of a shape.
+
+    radialCenter:p2 = 0.0, 0.0;
+    radialAngle:r = 0;
+    radialMoveSpeed:r = 6.04;
+
+    moveRadial:b = yes;
+    thousandth:b = true;
+  }
+}

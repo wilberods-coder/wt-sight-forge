@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: #0b0f14;
+  color: #f5f5f5;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(255, 107, 53, 0.45);
+}
+
+/* Range slider in the accent colour. */
+.wt-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 18px;
+  background: transparent;
+  cursor: pointer;
+}
+.wt-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 4px;
+  background: #263241;
+}
+.wt-range::-moz-range-track {
+  height: 4px;
+  border-radius: 4px;
+  background: #263241;
+}
+.wt-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: #ff6b35;
+  border: 2px solid #0b0f14;
+  box-shadow: 0 0 0 1px #ff6b35;
+  transition: transform 0.12s;
+}
+.wt-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ff6b35;
+  border: 2px solid #0b0f14;
+}
+.wt-range:active::-webkit-slider-thumb {
+  transform: scale(1.2);
+}
+.wt-range:focus-visible {
+  outline: none;
+}
+.wt-range:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.35);
+}
+
+/* Transparency checkerboard behind image thumbnails. */
+.checker {
+  background-color: #10151c;
+  background-image: linear-gradient(45deg, #18202a 25%, transparent 25%), linear-gradient(-45deg, #18202a 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #18202a 75%), linear-gradient(-45deg, transparent 75%, #18202a 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+
+input[type='number']::-webkit-inner-spin-button {
+  opacity: 0.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Thin scrollbars inside panels. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #263241 transparent;
+}

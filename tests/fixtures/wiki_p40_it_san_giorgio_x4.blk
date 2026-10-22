@@ -1,0 +1,140 @@
+ it_san_giorgio_x4 {
+   crosshairHorVertSize:p2 = 0, 0
+   rangefinderProgressBarColor1:c = 0, 255, 0, 64
+   rangefinderProgressBarColor2:c = 255, 255, 255, 64
+   rangefinderTextScale:r = 0.7
+   rangefinderVerticalOffset:r = 15
+   rangefinderHorizontalOffset:r = 5
+   fontSizeMult:r = 1.25
+   lineSizeMult:r = 1.5
+   drawCentralLineVert:b = no
+   drawCentralLineHorz:b = no
+   crosshairDistHorSizeMain:p2 = 0.03, 0.02
+   crosshairDistHorSizeAdditional:p2 = 0.005, 0.003
+   distanceCorrectionPos:p2 = -0.2, -0.05
+   drawDistanceCorrection:b = yes
+
+   ballistics {
+     bullet {
+       bulletType:t = "apcbc_tank"
+       speed:r = 624.0
+
+       drawAdditionalLines:b = no
+       drawDistanceCorrection:b = yes
+       distanceCorrectionPos:p2 = -0.15, -0.15
+
+       distancePos:p2 = 0.03, 0.0 // смещение шкалы относительно центра
+       textAlign:i = 1
+       textPos:p2 = -0.012, 0.0
+       textShift:r = 0.0 
+       crosshairDistHorSizeMain:p2 = 0.0075, 0.0075
+       crosshairDistHorSizeAdditional:p2 = 0.005, 0.003
+
+       crosshair_distances {
+         distance:p3 = 200, 0, 0 // + и - риски
+         distance:p3 = 400, 0, 0
+         distance:p3 = 600, 0, 0
+         distance:p3 = 800, 0, 0
+         distance:p3 = 1000, 10, 0.01
+         distance:p3 = 1200, 0, 0
+         distance:p3 = 1400, 0, 0
+         distance:p3 = 1600, 0, 0
+         distance:p3 = 1800, 0, 0
+         distance:p3 = 2000, 20, 0.01
+       }
+     }
+
+     bullet {
+       bulletType:t = "he_frag_tank"
+       speed:r = 552.0
+
+       drawAdditionalLines:b = no // рисовать риски на центральной линии
+
+       drawDistanceCorrection:b = no
+       distanceCorrectionPos:p2 = -0.09, -0.05
+
+       distancePos:p2 = -0.02, 0.0 //смещение шкалы
+       textPos:p2 = 0.02, 0.0
+       textShift:r = 0.0 //смещение текста
+       textAlign:i = 2 //положение текста относительно рисок
+       crosshairDistHorSizeMain:p2 = 0.0075, 0.0075
+       crosshairDistHorSizeAdditional:p2 = 0.005, 0.003
+
+       crosshair_distances {
+         distance:p3 = 200, 0, 0
+         distance:p3 = 300, 0, 0
+         distance:p3 = 400, 0, 0
+         distance:p3 = 500, 5, -0.01
+         distance:p3 = 600, 0, 0
+         distance:p3 = 700, 0, 0
+         distance:p3 = 800, 0, 0
+         distance:p3 = 900, 0, 0
+         distance:p3 = 1000, 10, -0.01
+         distance:p3 = 1100, 0, 0
+         distance:p3 = 1200, 0, 0
+         distance:p3 = 1300, 0, 0
+         distance:p3 = 1400, 0, 0
+         distance:p3 = 1500, 15, -0.01
+         distance:p3 = 1600, 0, 0
+         distance:p3 = 1700, 0, 0
+         distance:p3 = 1800, 0, 0
+         distance:p3 = 1900, 0, 0
+         distance:p3 = 2000, 20, 0
+       }
+     }
+   }
+
+   crosshair_hor_ranges {
+     range:p2 = -60, 60
+     range:p2 = -50, 0
+     range:p2 = -40, 40
+     range:p2 = -30, 0
+     range:p2 = -20, 20
+     range:p2 = 20, 20
+     range:p2 = 30, 0
+     range:p2 = 40, 40
+     range:p2 = 50, 0
+     range:p2 = 60, 60
+   }
+
+   drawLines {
+     // Vertical lines
+     line { line:p4 = 0, -1.0, 0, -0.018; move:b = false; }
+     line { line:p4 = 0, 0.018, 0,   1.0; move:b = false; }
+
+     // Horizontal lines
+     line { line:p4 = -1.0, 0, -0.02, 0; }
+     line { line:p4 = 0.02, 0,  1.0, 0; }
+
+     // 
+     line { line:p4 = -0.002, 0, -0.01, 0.00; move:b = false; }
+     line { line:p4 = 0.002, 0,  0.01, 0.00; move:b = false; }
+
+     line { line:p4 = 0.0, 0.002, 0.0, 0.01; move:b = false; }
+     line { line:p4 = 0.0, -0.002, 0.0, -0.01; move:b = false; }
+
+     line { line:p4 = -30, 30, -30, 40; thousandth:b = true; }
+     line { line:p4 = -40, 30, -40, 40; thousandth:b = true; }
+     line { line:p4 = -50, 30, -50, 40; thousandth:b = true; }
+
+     line { line:p4 = 30, 30, 30, 40; thousandth:b = true; }
+     line { line:p4 = 40, 30, 40, 40; thousandth:b = true; }
+     line { line:p4 = 50, 30, 50, 40; thousandth:b = true; }
+
+     line { line:p4 = -30, 0, -30, 10; thousandth:b = true; }
+     line { line:p4 = -40, 0, -40, 10; thousandth:b = true; }
+     line { line:p4 = -50, 0, -50, 10; thousandth:b = true; }
+
+     line { line:p4 = 30, 0, 30, 10; thousandth:b = true; }
+     line { line:p4 = 40, 0, 40, 10; thousandth:b = true; }
+     line { line:p4 = 50, 0, 50, 10; thousandth:b = true; }
+
+     line { line:p4 = 20, 0, 20, 3,5; thousandth:b = true; }
+     line { line:p4 = -20, 0, -20, 3,5; thousandth:b = true; }
+     line { line:p4 = 60, 0, 60, 5; thousandth:b = true; }
+     line { line:p4 = -60, 0, -60, 5; thousandth:b = true; }
+
+     line { line:p4 = 70, 0, 70, 5; thousandth:b = true; }
+     line { line:p4 = -70, 0, -70, 5; thousandth:b = true; }
+   }
+ }

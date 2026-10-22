@@ -1,0 +1,108 @@
+ ballistics {
+   bullet {
+     bulletType:t = "apds_fs_tungsten_small_core_tank"
+     speed:r = 1430.0
+
+     drawAdditionalLines:b = no
+     drawDistanceCorrection:b = yes
+     distanceCorrectionPos:p2 = -0.15, -0.15
+     drawUpward:b = yes // возможность рисовать шкалу отраженной вверх как на советских прицелах например ТШ2Б-41
+     distancePos:p2 = 0.03, 0.0 // смещение шкалы относительно центра
+     textAlign:i = 1
+     textPos:p2 = -0.012, 0.0
+     textShift:r = 0.0 
+     crosshairDistHorSizeMain:p2 = 0.0075, 0.0075
+     crosshairDistHorSizeAdditional:p2 = 0.005, 0.003
+
+     crosshair_distances {
+       distance:p3 = 200, 0, 0 // + и - риски
+       distance:p3 = 400, 0, 0
+       distance:p3 = 600, 0, 0
+       distance:p3 = 800, 0, 0
+       distance:p3 = 1000, 10, 0.01
+       distance:p3 = 1200, 0, 0
+       distance:p3 = 1400, 0, 0
+       distance:p3 = 1600, 0, 0
+       distance:p3 = 1800, 0, 0
+       distance:p3 = 2000, 20, 0.01
+     }
+   }
+
+   bullet {
+     bulletType:t = "heat_fs_tank"
+     speed:r = 1085.0
+
+     drawAdditionalLines:b = no // рисовать риски на центральной линии
+
+     drawDistanceCorrection:b = no
+     distanceCorrectionPos:p2 = -0.09, -0.05
+
+     distancePos:p2 = -0.02, 0.0 //смещение шкалы
+     textPos:p2 = 0.02, 0.0
+     textShift:r = 0.0 //смещение текста
+     textAlign:i = 2 //положение текста относительно рисок
+     crosshairDistHorSizeMain:p2 = 0.0075, 0.0075
+     crosshairDistHorSizeAdditional:p2 = 0.005, 0.003
+
+     crosshair_distances {
+       distance:p3 = 200, 0, 0
+       distance:p3 = 300, 0, 0
+       distance:p3 = 400, 0, 0
+       distance:p3 = 500, 5, -0.01
+       distance:p3 = 600, 0, 0
+       distance:p3 = 700, 0, 0
+       distance:p3 = 800, 0, 0
+       distance:p3 = 900, 0, 0
+       distance:p3 = 1000, 10, -0.01
+       distance:p3 = 1100, 0, 0
+       distance:p3 = 1200, 0, 0
+       distance:p3 = 1300, 0, 0
+       distance:p3 = 1400, 0, 0
+       distance:p3 = 1500, 15, -0.01
+       distance:p3 = 1600, 0, 0
+       distance:p3 = 1700, 0, 0
+       distance:p3 = 1800, 0, 0
+       distance:p3 = 1900, 0, 0
+       distance:p3 = 2000, 20, 0
+     }
+   }
+
+   bullet {
+     bulletType:t = "apcbc_tank"
+     speed:r = 887.0
+
+     drawAdditionalLines:b = no // рисовать риски на центральной линии
+
+     drawDistanceCorrection:b = no
+     distanceCorrectionPos:p2 = -0.09, -0.05
+
+     distancePos:p2 = -0.07, 0.0 //смещение шкалы
+     textPos:p2 = 0.02, 0.0
+     textShift:r = 0.0 //смещение текста
+     textAlign:i = 2 //положение текста относительно рисок
+     crosshairDistHorSizeMain:p2 = 0.0075, 0.0075
+     crosshairDistHorSizeAdditional:p2 = 0.005, 0.003
+
+     crosshair_distances {
+       distance:p3 = 200, 0, 0
+       distance:p3 = 300, 0, 0
+       distance:p3 = 400, 0, 0
+       distance:p3 = 500, 5, -0.01
+       distance:p3 = 600, 0, 0
+       distance:p3 = 700, 0, 0
+       distance:p3 = 800, 0, 0
+       distance:p3 = 900, 0, 0
+       distance:p3 = 1000, 10, -0.01
+       distance:p3 = 1100, 0, 0
+       distance:p3 = 1200, 0, 0
+       distance:p3 = 1300, 0, 0
+       distance:p3 = 1400, 0, 0
+       distance:p3 = 1500, 15, -0.01
+       distance:p3 = 1600, 0, 0
+       distance:p3 = 1700, 0, 0
+       distance:p3 = 1800, 0, 0
+       distance:p3 = 1900, 0, 0
+       distance:p3 = 2000, 20, 0
+     }
+   }
+ }

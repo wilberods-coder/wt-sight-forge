@@ -1,0 +1,34 @@
+crosshair_distances{
+  distance:p3=200, 0, 0
+  distance:p3=400, 4, 0
+  distance:p3=600, 0, 0
+  distance:p3=800, 8, 0
+  distance:p3=1000, 0, 0
+  distance:p3=1200, 12, 0
+  distance:p3=1400, 0, 0
+  distance:p3=1600, 16, 0
+  distance:p3=1800, 0, 0
+  distance:p3=2000, 20, 0
+  distance:p3=2200, 0, 0
+  distance:p3=2400, 24, 0
+  distance:p3=2600, 0, 0
+  distance:p3=2800, 28, 0
+}
+ crosshair_hor_ranges {
+   range:p2 = -32, 32
+   range:p2 = -28, 0
+   range:p2 = -24, 24
+   range:p2 = -20, 0
+   range:p2 = -16, 16
+   range:p2 = -12, 0
+   range:p2 = -8, 8
+   range:p2 = -4, 0
+   range:p2 = 4, 0
+   range:p2 = 8, 8
+   range:p2 = 12, 0
+   range:p2 = 16, 16
+   range:p2 = 20, 0
+   range:p2 = 24, 24
+   range:p2 = 28, 0
+   range:p2 = 32, 32
+ }
