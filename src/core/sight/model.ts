@@ -8,19 +8,31 @@ export type ThousandthType = 'ussr' | 'nato' | 'real';
  * Drawing primitive in sight space. All coordinates are in thousandths (mils) with
  * `thousandth:b = yes`; the origin is the aim point and positive y points DOWN
  * (same convention as drawLines in the official wiki example).
+ *
+ * Lines and quads with `screen: true` are written with `thousandth:b = no` instead: their
+ * coordinates are fractions of the screen height (origin at the centre, so the visible
+ * height spans -0.5..0.5). That is how WTDraw-made art sights are drawn: they keep their
+ * on-screen size at every zoom level.
  */
 export type Prim =
-  | { kind: 'line'; a: Vec; b: Vec; src: PrimSource }
-  | { kind: 'quad'; p: [Vec, Vec, Vec, Vec]; src: PrimSource }
+  | { kind: 'line'; a: Vec; b: Vec; src: PrimSource; screen?: boolean }
+  | { kind: 'quad'; p: [Vec, Vec, Vec, Vec]; src: PrimSource; screen?: boolean }
   | { kind: 'circle'; pos: Vec; diameter: number; size: number; segment: [number, number]; src: PrimSource }
   | { kind: 'text'; text: string; pos: Vec; size: number; align: number; src: PrimSource };
 
 export type PrimSource = 'artwork' | 'element';
 
+export type ArtAnchor = 'screen' | 'mils';
+export type ArtPreset = 'topRight' | 'topLeft' | 'bottomRight' | 'bottomLeft' | 'center';
+
 export interface ArtworkSettings {
   enabled: boolean;
   trace: TraceOptions;
-  /** Longest side of the artwork, in mils. */
+  /** "screen": fractions of screen height, fixed on screen; "mils": thousandths, zooms with the sight. */
+  anchor: ArtAnchor;
+  /** When set, offsets are derived from the artwork bounds so it sits in that corner of the crosshair. */
+  preset: ArtPreset | null;
+  /** Longest side of the artwork, in screen heights (anchor "screen") or mils (anchor "mils"). Offsets use the same unit. */
   size: number;
   /** Degrees, clockwise on screen. */
   rotation: number;
@@ -130,10 +142,14 @@ export const uid = () => Math.random().toString(36).slice(2, 10);
 export const DEFAULT_ARTWORK: ArtworkSettings = {
   enabled: true,
   trace: DEFAULT_TRACE,
-  size: 40,
+  anchor: 'screen',
+  preset: 'topRight',
+  // Up and to the right of the crosshair — the usual art-sight layout. The visible screen spans
+  // -0.5..0.5 vertically, so 0.45 still fits above the horizontal line.
+  size: 0.45,
   rotation: 0,
-  offsetX: 0,
-  offsetY: 0,
+  offsetX: 0.24,
+  offsetY: -0.24,
   flipX: false,
   flipY: false,
 };
@@ -185,12 +201,26 @@ export function normalizeProject(p: Partial<SightProject>): SightProject {
     ...p,
     format: 'wt-sight-forge',
     version: 1,
-    artwork: { ...base.artwork, ...p.artwork, trace: { ...base.artwork.trace, ...p.artwork?.trace } },
+    artwork: { ...base.artwork, ...legacyPlacement(p.artwork), trace: { ...base.artwork.trace, ...p.artwork?.trace } },
     elements: Object.fromEntries(
       Object.entries(base.elements).map(([k, v]) => [k, { ...v, ...(p.elements as Record<string, object> | undefined)?.[k] }]),
     ) as unknown as ElementsConfig,
     globals: { ...base.globals, ...p.globals, matchClasses: { ...base.globals.matchClasses, ...p.globals?.matchClasses } },
   };
+}
+
+/**
+ * Projects saved before screen anchoring existed were placed in mils. Untouched ones (centred,
+ * default size) move to the new default layout; hand-placed ones keep their mils placement.
+ */
+function legacyPlacement(a: Partial<ArtworkSettings> | undefined): Partial<ArtworkSettings> {
+  if (!a || a.anchor) return a ?? {};
+  const untouched = !a.offsetX && !a.offsetY && (a.size === undefined || a.size === 40);
+  if (untouched) {
+    const { trace, enabled, rotation, flipX, flipY } = a;
+    return { trace, enabled, rotation, flipX, flipY } as Partial<ArtworkSettings>;
+  }
+  return { ...a, anchor: 'mils', preset: null };
 }
 
 export const MILS_PER_RAD: Record<ThousandthType, number> = {

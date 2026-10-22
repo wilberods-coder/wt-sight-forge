@@ -1,7 +1,7 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import type { Raster } from '../core/image/raster';
 import { traceArtwork, type ArtGeometry } from '../core/image/trace';
-import { buildElementPrims, placeArtwork } from '../core/sight/elements';
+import { buildElementPrims, placeArtwork, resolveArtwork } from '../core/sight/elements';
 import type { Prim, SightProject } from '../core/sight/model';
 import { imageToRaster, loadImageElement } from '../lib/imageLoad';
 
@@ -12,6 +12,8 @@ export interface Pipeline {
   prims: Prim[];
   counts: { lines: number; quads: number; circles: number; texts: number; total: number };
   traceMs: number;
+  /** Artwork settings with resolved offsets. */
+  artwork: SightProject['artwork'];
 }
 
 export function countPrims(prims: Prim[]) {
@@ -55,14 +57,16 @@ export function usePipeline(project: SightProject): Pipeline {
   }, [raster, trace]);
 
   const a = project.artwork;
-  const artPrims = useMemo(
-    () => (geometry && a.enabled ? placeArtwork(geometry, a) : []),
+  // Offsets actually used (presets derive them from the traced bounds).
+  const artwork = useMemo(
+    () => (geometry ? resolveArtwork(geometry, a) : a),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [geometry, a.enabled, a.size, a.rotation, a.offsetX, a.offsetY, a.flipX, a.flipY],
+    [geometry, a.enabled, a.anchor, a.preset, a.size, a.rotation, a.offsetX, a.offsetY, a.flipX, a.flipY],
   );
+  const artPrims = useMemo(() => (geometry && artwork.enabled ? placeArtwork(geometry, artwork) : []), [geometry, artwork]);
   const elementPrims = useMemo(() => buildElementPrims(project.elements, project.globals), [project.elements, project.globals.thousandth]); // eslint-disable-line react-hooks/exhaustive-deps
   const prims = useMemo(() => [...artPrims, ...elementPrims], [artPrims, elementPrims]);
   const counts = useMemo(() => countPrims(prims), [prims]);
 
-  return { imageEl, raster, geometry, prims, counts, traceMs };
+  return { imageEl, raster, geometry, prims, counts, traceMs, artwork };
 }

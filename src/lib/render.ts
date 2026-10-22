@@ -28,24 +28,29 @@ export interface RenderInput {
 
 const rgba = (c: RGBA) => `rgba(${c[0]},${c[1]},${c[2]},${(c[3] / 255).toFixed(3)})`;
 
-/** Cache of batched Path2D objects (in mils) per primitive list — thousands of quads stay cheap to redraw. */
-const pathCache = new WeakMap<Prim[], { quads: Path2D; lines: Path2D }>();
+/** Cache of batched Path2D objects per primitive list — thousands of quads stay cheap to redraw.
+ *  `mils` paths are in thousandths, `screen` paths in fractions of screen height. */
+interface Batch {
+  quads: Path2D;
+  lines: Path2D;
+}
+const pathCache = new WeakMap<Prim[], { mils: Batch; screen: Batch }>();
 function batched(prims: Prim[]) {
   let c = pathCache.get(prims);
   if (!c) {
-    const quads = new Path2D();
-    const lines = new Path2D();
+    c = { mils: { quads: new Path2D(), lines: new Path2D() }, screen: { quads: new Path2D(), lines: new Path2D() } };
     for (const p of prims) {
+      if (p.kind !== 'quad' && p.kind !== 'line') continue;
+      const b = p.screen ? c.screen : c.mils;
       if (p.kind === 'quad') {
-        quads.moveTo(p.p[0][0], p.p[0][1]);
-        for (let i = 1; i < 4; i++) quads.lineTo(p.p[i][0], p.p[i][1]);
-        quads.closePath();
-      } else if (p.kind === 'line') {
-        lines.moveTo(p.a[0], p.a[1]);
-        lines.lineTo(p.b[0], p.b[1]);
+        b.quads.moveTo(p.p[0][0], p.p[0][1]);
+        for (let i = 1; i < 4; i++) b.quads.lineTo(p.p[i][0], p.p[i][1]);
+        b.quads.closePath();
+      } else {
+        b.lines.moveTo(p.a[0], p.a[1]);
+        b.lines.lineTo(p.b[0], p.b[1]);
       }
     }
-    c = { quads, lines };
     pathCache.set(prims, c);
   }
   return c;
@@ -70,6 +75,7 @@ export function renderPreview(ctx: CanvasRenderingContext2D, w: number, h: numbe
   drawScene(ctx, opts.scene, view);
 
   const toMils = () => ctx.setTransform(ppm, 0, 0, ppm, w / 2, h / 2);
+  const toScreen = () => ctx.setTransform(unit, 0, 0, unit, w / 2, h / 2);
 
   // Original image as an underlay, placed exactly like the traced artwork.
   if (opts.showSource && inp.source && inp.artwork.enabled) {
@@ -77,7 +83,8 @@ export function renderPreview(ctx: CanvasRenderingContext2D, w: number, h: numbe
     const iw = inp.source.naturalWidth;
     const ih = inp.source.naturalHeight;
     const side = Math.max(iw, ih);
-    toMils();
+    if (a.anchor === 'screen') toScreen();
+    else toMils();
     ctx.save();
     ctx.translate(a.offsetX, a.offsetY);
     ctx.rotate((a.rotation * Math.PI) / 180);
@@ -119,14 +126,18 @@ export function renderPreview(ctx: CanvasRenderingContext2D, w: number, h: numbe
   // The sight itself.
   const color = rgba(opts.light ? g.lightColor : g.color);
   const lineW = Math.max(1, 1.6 * scale) * g.lineSizeMult;
-  const { quads, lines } = batched(inp.prims);
-  toMils();
+  const batch = batched(inp.prims);
   ctx.fillStyle = color;
   ctx.strokeStyle = color;
   ctx.lineCap = 'butt';
-  ctx.fill(quads);
+  toScreen();
+  ctx.fill(batch.screen.quads);
+  ctx.lineWidth = lineW / unit;
+  ctx.stroke(batch.screen.lines);
+  toMils();
+  ctx.fill(batch.mils.quads);
   ctx.lineWidth = lineW / ppm;
-  ctx.stroke(lines);
+  ctx.stroke(batch.mils.lines);
 
   for (const p of inp.prims) {
     if (p.kind === 'circle') {

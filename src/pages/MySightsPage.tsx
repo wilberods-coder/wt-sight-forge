@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button, Hint, Panel } from '../components/ui';
 import { traceArtwork } from '../core/image/trace';
 import { compileSight } from '../core/sight/compile';
-import { buildElementPrims, placeArtwork } from '../core/sight/elements';
+import { buildElementPrims, placeArtwork, resolveArtwork } from '../core/sight/elements';
 import { uid, type SightProject } from '../core/sight/model';
 import { useI18n } from '../i18n';
 import { downloadText, projectFileName, projectToJson } from '../lib/download';
@@ -15,7 +15,8 @@ async function compileStored(p: SightProject) {
   let prims = buildElementPrims(p.elements, p.globals);
   if (p.image && p.artwork.enabled) {
     const img = await loadImageElement(p.image.dataUrl);
-    prims = [...placeArtwork(traceArtwork(imageToRaster(img), p.artwork.trace), p.artwork), ...prims];
+    const geo = traceArtwork(imageToRaster(img), p.artwork.trace);
+    prims = [...placeArtwork(geo, resolveArtwork(geo, p.artwork)), ...prims];
   }
   return compileSight({ globals: p.globals, elements: p.elements, prims });
 }

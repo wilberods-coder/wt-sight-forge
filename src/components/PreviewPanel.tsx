@@ -39,7 +39,7 @@ export const DEFAULT_VIEW: PreviewOptions & { zoom: number; moveArt: boolean } =
   showSource: false,
   sourceOpacity: 0.4,
   light: false,
-  mask: true,
+  mask: false,
   moveArt: false,
 };
 export type ViewState = typeof DEFAULT_VIEW;
@@ -111,13 +111,13 @@ export function PreviewPanel({
           prims: pipe.prims,
           globals: project.globals,
           elements: project.elements,
-          artwork: project.artwork,
+          artwork: pipe.artwork,
           source: pipe.imageEl,
           opts: view,
         });
     });
     return () => cancelAnimationFrame(id);
-  }, [size, pipe.prims, pipe.imageEl, project.globals, project.elements, project.artwork, view, canvasRef]);
+  }, [size, pipe.prims, pipe.imageEl, project.globals, project.elements, pipe.artwork, view, canvasRef]);
 
   // Wheel zoom needs a non-passive listener.
   useEffect(() => {
@@ -156,7 +156,12 @@ export function PreviewPanel({
       setZoom(pinch.current.zoom * (Math.hypot(a.x - b.x, a.y - b.y) / pinch.current.dist));
       return;
     }
-    if (view.moveArt) op.artwork({ offsetX: +(project.artwork.offsetX + dx / ppmCss).toFixed(2), offsetY: +(project.artwork.offsetY + dy / ppmCss).toFixed(2) });
+    if (view.moveArt) {
+      // Dragging switches the artwork from a corner preset to a custom position.
+      const k = pipe.artwork.anchor === 'screen' ? 1 / size.h : 1 / ppmCss;
+      const r = (v: number) => Math.round(v * 10000) / 10000;
+      op.artwork({ preset: null, offsetX: r(pipe.artwork.offsetX + dx * k), offsetY: r(pipe.artwork.offsetY + dy * k) });
+    }
     else setView((v) => ({ ...v, panX: v.panX + dx / ppmCss, panY: Math.max(-200, Math.min(200, v.panY + dy / ppmCss)) }));
   };
   const onPointerUp = (e: React.PointerEvent) => {

@@ -46,7 +46,7 @@ export function GeneratorPage({
             <ImageTracePanel project={project} op={op} geometry={pipe.geometry} />
           </Section>
           <Section title={t('image.transform')} icon={<Move size={16} />}>
-            <ImageTransformPanel project={project} op={op} />
+            <ImageTransformPanel project={project} op={op} resolved={pipe.artwork} />
           </Section>
         </Panel>
         <Panel>

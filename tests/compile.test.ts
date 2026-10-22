@@ -6,8 +6,8 @@ import { findBlocks, getParam, parseBlk } from '../src/core/blk/parser';
 import { isConvexQuad } from '../src/core/blk/validate';
 import { DEFAULT_TRACE, traceArtwork } from '../src/core/image/trace';
 import { compileSight, distanceList } from '../src/core/sight/compile';
-import { buildElementPrims, placeArtwork } from '../src/core/sight/elements';
-import { newProject, type Prim } from '../src/core/sight/model';
+import { PRESET_GAP, artworkBounds, buildElementPrims, placeArtwork, resolveArtwork } from '../src/core/sight/elements';
+import { newProject, normalizeProject, type Prim } from '../src/core/sight/model';
 
 const emblem = () => {
   const png = PNG.sync.read(fs.readFileSync(path.join(__dirname, 'fixtures', 'emblem_transparent.png')));
@@ -86,5 +86,69 @@ describe('compileSight', () => {
     const out = compileSight({ globals: p.globals, elements: p.elements, prims: placeArtwork(geo, p.artwork) });
     expect(out.report.ok).toBe(true);
     expect(out.bytes).toBeLessThan(600_000);
+  });
+});
+
+describe('screen-anchored artwork (WTDraw-style art sights)', () => {
+  const geo = () => traceArtwork(emblem(), { ...DEFAULT_TRACE, mode: 'both' });
+
+  it('new projects put the art up-right of the crosshair in screen units', () => {
+    const p = newProject('art');
+    expect(p.artwork.anchor).toBe('screen');
+    expect(p.artwork.preset).toBe('topRight');
+    const g = geo();
+    const art = placeArtwork(g, resolveArtwork(g, p.artwork));
+    const b = artworkBounds(g, resolveArtwork(g, p.artwork))!;
+    expect(b).not.toBeNull();
+    const pts = art.flatMap((x) => (x.kind === 'quad' ? x.p : x.kind === 'line' ? [x.a, x.b] : []));
+    const minX = Math.min(...pts.map((v) => v[0]));
+    const maxY = Math.max(...pts.map((v) => v[1]));
+    const minY = Math.min(...pts.map((v) => v[1]));
+    expect(minX).toBeCloseTo(PRESET_GAP.screen, 3); // just right of the vertical line
+    expect(maxY).toBeCloseTo(-PRESET_GAP.screen, 3); // just above the horizontal line
+    expect(minY).toBeGreaterThan(-0.5); // stays inside the screen height
+    expect(art.every((x) => (x.kind === 'quad' || x.kind === 'line') && x.screen)).toBe(true);
+  });
+
+  it.each(['topLeft', 'bottomRight', 'bottomLeft', 'center'] as const)('preset %s lands in its quadrant', (preset) => {
+    const g = geo();
+    const a = resolveArtwork(g, { ...newProject().artwork, preset });
+    const pts = placeArtwork(g, a).flatMap((x) => (x.kind === 'quad' ? x.p : x.kind === 'line' ? [x.a, x.b] : []));
+    const xs = pts.map((v) => v[0]);
+    const ys = pts.map((v) => v[1]);
+    if (preset === 'center') {
+      expect(a.offsetX).toBe(0);
+      return;
+    }
+    if (preset.endsWith('Left')) expect(Math.max(...xs)).toBeLessThan(0);
+    else expect(Math.min(...xs)).toBeGreaterThan(0);
+    if (preset.startsWith('top')) expect(Math.max(...ys)).toBeLessThan(0);
+    else expect(Math.min(...ys)).toBeGreaterThan(0);
+  });
+
+  it('writes art with thousandth:b = no and reticle elements with thousandth:b = yes', () => {
+    const p = newProject('art');
+    const g = geo();
+    const prims = [...placeArtwork(g, resolveArtwork(g, p.artwork)), ...buildElementPrims(p.elements, p.globals)];
+    const out = compileSight({ globals: p.globals, elements: p.elements, prims });
+    expect(out.report.ok).toBe(true);
+    const quads = out.text.split('\n').filter((l) => l.trim().startsWith('quad {'));
+    const artQuads = quads.filter((l) => l.includes('thousandth:b = no'));
+    expect(artQuads.length).toBe(g.quads.length);
+    expect(quads.length - artQuads.length).toBeGreaterThan(0); // the centre dot stays in mils
+    for (const l of artQuads)
+      for (const [, v] of l.matchAll(/:p2 = ([^;]+);/g)) for (const n of v.split(',').map(Number)) expect(Math.abs(n)).toBeLessThanOrEqual(1);
+  });
+
+  it('projects saved before anchoring existed stay in mils at their saved offset', () => {
+    const old = normalizeProject({ artwork: { size: 40, offsetX: 5, offsetY: -3 } as never });
+    expect(old.artwork.anchor).toBe('mils');
+    expect(old.artwork.preset).toBeNull();
+    expect(resolveArtwork(geo(), old.artwork).offsetX).toBe(5);
+    // An untouched old default (centred, 40 mils) moves to the new up-right screen layout.
+    const untouched = normalizeProject({ artwork: { size: 40, offsetX: 0, offsetY: 0, rotation: 0 } as never });
+    expect(untouched.artwork.anchor).toBe('screen');
+    expect(untouched.artwork.preset).toBe('topRight');
+    expect(untouched.artwork.size).toBe(0.45);
   });
 });

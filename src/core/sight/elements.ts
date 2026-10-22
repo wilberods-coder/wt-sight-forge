@@ -1,5 +1,5 @@
 import type { ArtGeometry } from '../image/trace';
-import { MILS_PER_RAD, type ArtworkSettings, type ElementsConfig, type Prim, type SightGlobals, type Vec } from './model';
+import { MILS_PER_RAD, type ArtPreset, type ArtworkSettings, type ElementsConfig, type Prim, type SightGlobals, type Vec } from './model';
 
 const line = (a: Vec, b: Vec): Prim => ({ kind: 'line', a, b, src: 'element' });
 const rectQuad = (x0: number, y0: number, x1: number, y1: number): Prim => ({
@@ -123,14 +123,56 @@ export function placeArtwork(geo: ArtGeometry, a: ArtworkSettings): Prim[] {
     const sy = y * a.size * fy;
     return [sx * cos - sy * sin + a.offsetX, sx * sin + sy * cos + a.offsetY];
   };
+  const screen = a.anchor === 'screen';
   const out: Prim[] = [];
   const mirrored = a.flipX !== a.flipY;
   for (const q of geo.quads) {
     let p = q.map(tf) as [Vec, Vec, Vec, Vec];
     // Mirroring reverses the winding; keep tl→tr→br→bl order consistent.
     if (mirrored) p = [p[1], p[0], p[3], p[2]];
-    out.push({ kind: 'quad', p, src: 'artwork' });
+    out.push({ kind: 'quad', p, src: 'artwork', screen });
   }
-  for (const [s, e] of geo.segments) out.push({ kind: 'line', a: tf(s), b: tf(e), src: 'artwork' });
+  for (const [s, e] of geo.segments) out.push({ kind: 'line', a: tf(s), b: tf(e), src: 'artwork', screen });
   return out;
+}
+
+/** Tight bounding box of the placed artwork (ignores offset), or null when nothing is drawn. */
+export function artworkBounds(geo: ArtGeometry, a: ArtworkSettings) {
+  const prims = placeArtwork(geo, { ...a, offsetX: 0, offsetY: 0 });
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const p of prims) {
+    const pts = p.kind === 'quad' ? p.p : p.kind === 'line' ? [p.a, p.b] : [];
+    for (const [x, y] of pts) {
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+    }
+  }
+  return Number.isFinite(minX) ? { minX, minY, maxX, maxY } : null;
+}
+
+/**
+ * Offsets that put the artwork in a quadrant next to the crosshair, its nearest corner
+ * `gap` away from both centre lines (gap in the artwork's own unit).
+ */
+export function presetOffset(geo: ArtGeometry, a: ArtworkSettings, preset: ArtPreset, gap: number): { offsetX: number; offsetY: number } {
+  const b = artworkBounds(geo, a);
+  if (!b || preset === 'center') return { offsetX: 0, offsetY: 0 };
+  const right = preset === 'topRight' || preset === 'bottomRight';
+  const top = preset === 'topRight' || preset === 'topLeft';
+  const round = (v: number) => Math.round(v * 10000) / 10000;
+  return {
+    offsetX: round(right ? gap - b.minX : -gap - b.maxX),
+    offsetY: round(top ? -gap - b.maxY : gap - b.minY),
+  };
+}
+
+/** Gap between the artwork and the centre lines for corner presets, per anchor unit. */
+export const PRESET_GAP = { screen: 0.012, mils: 1.5 } as const;
+
+/** Artwork settings with preset-derived offsets filled in (what actually gets exported). */
+export function resolveArtwork(geo: ArtGeometry, a: ArtworkSettings): ArtworkSettings {
+  if (!a.preset) return a;
+  return { ...a, ...presetOffset(geo, a, a.preset, PRESET_GAP[a.anchor]) };
 }
